@@ -30,7 +30,7 @@ export const Navbar = () => {
   return (
     <header className="glass-panel relative z-50 overflow-visible rounded-3xl px-5 py-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <Link to="/" aria-label="Back to home" title="Back to home" className="xl:hidden h-10 w-10 rounded-2xl bg-white/5 border border-white/10 text-white inline-flex items-center justify-center hover:bg-white/10 transition">
+        <Link to="/" aria-label="Back to home" title="Back to home" className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 text-white inline-flex items-center justify-center hover:bg-white/10 transition">
           <Home className="h-5 w-5" />
         </Link>
         <button
@@ -46,7 +46,7 @@ export const Navbar = () => {
             onClick={() => setMenuOpen((current) => !current)}
             aria-label="Open navigation menu"
             title="Open navigation menu"
-            className="xl:hidden h-10 w-10 rounded-2xl bg-white/5 border border-white/10 text-white inline-flex items-center justify-center hover:bg-white/10 transition"
+            className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 text-white inline-flex items-center justify-center hover:bg-white/10 transition"
           >
             <Menu className="h-5 w-5" />
           </button>
