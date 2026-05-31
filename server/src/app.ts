@@ -20,6 +20,7 @@ app.use(
       // allow non-browser tools like curl/postman (no origin)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return callback(null, true);
       return callback(new Error('CORS policy: Origin not allowed'));
     },
     credentials: true,
