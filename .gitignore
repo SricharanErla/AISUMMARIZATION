@@ -11,5 +11,8 @@ coverage
 Thumbs.db
 client/dist
 server/dist
+*.tsbuildinfo
+client/vite.config.js
+client/vite.config.d.ts
 server/uploads/*
 !server/uploads/.gitkeep

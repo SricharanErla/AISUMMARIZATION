@@ -1,56 +1,98 @@
 # SummitAI
 
-Runtime-ready content summarizer for text, files, YouTube transcripts, and audio. The app now runs without a database or login service, and falls back to local summarization when OpenAI is not configured.
+AI-first summarization platform for text, files, YouTube transcripts, and audio.
 
-## Stack
-- Frontend: React, Vite, Tailwind CSS, Framer Motion, Axios, React Router DOM
-- Backend: Node.js, Express, Multer, TypeScript
-- AI: OpenAI API when available, local runtime fallback when it is not
+## Architecture
+- Monorepo with npm workspaces (`client`, `server`)
+- Frontend (`client`): React + Vite + Tailwind + Axios
+- Backend (`server`): Express + TypeScript + Multer
+- AI providers: Groq primary path with OpenAI fallback, runtime fallback if no provider keys are available
+
+## Clean Project Structure
+```text
+AISUMMARIZATION/
+   client/
+      src/
+      index.html
+      vite.config.ts
+      package.json
+   server/
+      src/
+      uploads/
+      package.json
+   package.json
+   README.md
+```
+
+Generated artifacts (`dist`, `*.tsbuildinfo`, generated `vite.config.js` files) are intentionally excluded from source control.
 
 ## Features
-- Text summarization with short, medium, and detailed outputs
-- Summary styles: paragraph, bullets, highlights
-- PDF and DOCX upload summarization
+- Text summarization (`short`, `medium`, `detailed`)
+- Output formats (`paragraph`, `bullets`, `highlights`)
+- File summarization (PDF, DOCX)
 - YouTube transcript summarization
-- Audio transcription and summarization
-- Speech-to-text and microphone recording in the workspace UI
-- Assistant chat over the generated summary or uploaded content
+- Audio transcription + summarization
+- Assistant Q&A on generated content
 
-## Local Setup
-1. Install dependencies from the root:
-   ```bash
-   npm install
-   ```
-2. Copy the example environment files:
-   - `server/.env.example` to `server/.env`
-   - `client/.env.example` to `client/.env`
-3. Run both apps in development:
-   ```bash
-   npm run dev
-   ```
+## Environment Setup
+1. Copy env templates:
+- `server/.env.example` -> `server/.env`
+- `client/.env.example` -> `client/.env`
+
+2. Configure server keys in `server/.env`:
+- `GROQ_API_KEY` (recommended)
+- `OPENAI_API_KEY` (optional fallback)
+
+3. Configure frontend API base in `client/.env`:
+- `VITE_API_BASE_URL=http://localhost:5000/api`
+
+## Perfect Local Workflow
+Install once from monorepo root:
+
+```bash
+npm install
+```
+
+Start both apps:
+
+```bash
+npm run dev
+```
+
+Useful commands:
+
+```bash
+npm run dev:server
+npm run dev:client
+npm run clean
+npm run build
+npm run rebuild
+npm run lint
+npm run verify
+```
+
+## Verification Checklist
+- Frontend: `http://localhost:5173`
+- Backend health: `http://localhost:5000/api/health`
+- Summarize endpoint: `POST /api/summarize/text`
+
+If `http://localhost:5000/` returns 404, that is expected (root route is not a UI route).
 
 ## Deployment
-Deploy the backend to Render and the frontend to Vercel.
-
-### Backend on Render
+### Backend (Render)
 - Root directory: `server`
 - Build command: `npm install && npm run build`
 - Start command: `npm start`
-- Environment variables:
-  - `NODE_ENV=production`
-  - `PORT=5000`
-  - `CLIENT_URL=<your frontend URL>`
-  - `OPENAI_API_KEY=<optional>`
-  - `MAX_UPLOAD_SIZE=26214400`
+- Required env:
+   - `NODE_ENV=production`
+   - `PORT=5000`
+   - `CLIENT_URL=<frontend_url>`
+   - `GROQ_API_KEY=<optional but recommended>`
+   - `OPENAI_API_KEY=<optional fallback>`
 
-### Frontend on Vercel
+### Frontend (Vercel)
 - Root directory: `client`
 - Build command: `npm run build`
 - Output directory: `dist`
-- Environment variables:
-  - `VITE_API_BASE_URL=<your backend URL>/api`
-
-## Production notes
-- Keep the frontend API URL pointed at the deployed backend.
-- Set `OPENAI_API_KEY` only if you want model-backed summaries.
-- If you use local uploads heavily, raise `MAX_UPLOAD_SIZE` in Render as needed.
+- Required env:
+   - `VITE_API_BASE_URL=<backend_url>/api`

@@ -7,12 +7,19 @@
     "server"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
     "build": "npm run build --workspace server && npm run build --workspace client",
     "start": "npm run start --workspace server",
-    "lint": "npm run lint --workspace server && npm run lint --workspace client"
+    "lint": "npm run lint --workspace server && npm run lint --workspace client",
+    "clean": "rimraf \"client/dist\" \"server/dist\" \"client/vite.config.js\" \"client/vite.config.d.ts\" && rimraf --glob \"client/*.tsbuildinfo\"",
+    "rebuild": "npm run clean && npm run build",
+    "verify": "npm run lint && npm run build"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "@typescript-eslint/parser": "^8.46.2",
+    "concurrently": "^9.1.0",
+    "rimraf": "^6.0.1"
   }
 }

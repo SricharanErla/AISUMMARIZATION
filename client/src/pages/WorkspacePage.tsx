@@ -23,7 +23,47 @@ export const WorkspacePage = () => {
   const chunksRef = useRef<Blob[]>([]);
   const { summaryType, summaryLength } = useSummaryControls();
 
-  const currentContext = useMemo(() => result?.summary?.summarizedText || result?.transcription || text, [result, text]);
+  const getSummaryText = (value: any) => {
+    const candidates = [
+      value?.analysis?.summary,
+      value?.summary?.summarizedText,
+      value?.summaryText,
+      value?.summary,
+      value?.analysis?.summarizedText,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && candidate.trim().length > 0) {
+        return candidate.trim();
+      }
+      if (candidate && typeof candidate === 'object') {
+        const nested = (candidate as any).summarizedText ?? (candidate as any).summary;
+        if (typeof nested === 'string' && nested.trim().length > 0) {
+          return nested.trim();
+        }
+      }
+    }
+
+    return 'Summary ready.';
+  };
+
+  const splitSummaryLines = (summaryText: string) => {
+    const byNewline = summaryText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (byNewline.length > 1) {
+      return byNewline;
+    }
+
+    return summaryText
+      .split(/(?<=[.!?])\s+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  };
+
+  const currentContext = useMemo(() => getSummaryText(result) || result?.transcription || text, [result, text]);
 
   const generate = async () => {
     setLoading(true);
@@ -67,7 +107,7 @@ export const WorkspacePage = () => {
   };
 
   const speakSummary = () => {
-    const utterance = new SpeechSynthesisUtterance(result?.analysis?.summary || result?.summary?.summarizedText || 'No summary available yet.');
+    const utterance = new SpeechSynthesisUtterance(getSummaryText(result) || 'No summary available yet.');
     utterance.rate = 1;
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
@@ -189,32 +229,33 @@ export const WorkspacePage = () => {
             {loading ? (
               <div className="space-y-3"><div className="h-4 w-3/4 rounded bg-white/10 animate-shimmer" /><div className="h-4 w-full rounded bg-white/10 animate-shimmer" /><div className="h-4 w-2/3 rounded bg-white/10 animate-shimmer" /></div>
             ) : result ? (
-              summaryLength === 'bullets' ? (
-                <ul className="space-y-2 text-white/85">
-                  {(result.analysis?.summary || result.summary?.summarizedText || result.summary || 'Summary ready.')
-                    .split('\n')
-                    .filter(Boolean)
-                    .map((line: string, index: number) => (
+              (() => {
+                const summaryText = getSummaryText(result);
+                const summaryLines = splitSummaryLines(summaryText);
+
+                if (summaryLength === 'bullets') {
+                  return <ul className="space-y-2 text-white/85">
+                    {summaryLines.map((line: string, index: number) => (
                       <li key={`${line}-${index}`} className="flex gap-3">
                         <span className="mt-2 h-2 w-2 rounded-full bg-cyan-300" />
                         <span>{line.replace(/^[-*•]\s*/, '')}</span>
                       </li>
                     ))}
-                </ul>
-              ) : summaryLength === 'highlights' ? (
-                <div className="flex flex-wrap gap-3 text-white/85">
-                  {(result.analysis?.summary || result.summary?.summarizedText || result.summary || 'Summary ready.')
-                    .split('\n')
-                    .filter(Boolean)
-                    .map((line: string, index: number) => (
+                  </ul>;
+                }
+
+                if (summaryLength === 'highlights') {
+                  return <div className="flex flex-wrap gap-3 text-white/85">
+                    {summaryLines.map((line: string, index: number) => (
                       <span key={`${line}-${index}`} className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
                         {line.replace(/^\d+\.\s*/, '')}
                       </span>
                     ))}
-                </div>
-              ) : (
-                <TypingText text={result.analysis?.summary || result.summary?.summarizedText || result.summary || 'Summary ready.'} />
-              )
+                  </div>;
+                }
+
+                return <TypingText text={summaryText} />;
+              })()
             ) : (
               <p className="text-white/55">Your generated summary will appear here.</p>
             )}
