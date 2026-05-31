@@ -42,9 +42,11 @@ Generated artifacts (`dist`, `*.tsbuildinfo`, generated `vite.config.js` files) 
 2. Configure server keys in `server/.env`:
 - `GROQ_API_KEY` (recommended)
 - `OPENAI_API_KEY` (optional fallback)
+- `CLIENT_URL` must match your deployed frontend origin exactly in production
 
 3. Configure frontend API base in `client/.env`:
 - `VITE_API_BASE_URL=http://localhost:5000/api`
+- You can also use `VITE_API_URL`, but `VITE_API_BASE_URL` is the canonical name
 
 ## Perfect Local Workflow
 Install once from monorepo root:
@@ -86,13 +88,29 @@ If `http://localhost:5000/` returns 404, that is expected (root route is not a U
 - Required env:
    - `NODE_ENV=production`
    - `PORT=5000`
-   - `CLIENT_URL=<frontend_url>`
+   - `CLIENT_URL=https://your-vercel-app.vercel.app`
    - `GROQ_API_KEY=<optional but recommended>`
    - `OPENAI_API_KEY=<optional fallback>`
+
+Backend routes:
+- `GET /` returns a simple JSON status payload
+- `GET /api/health` is the preferred health check
+- `POST /api/summarize/text` is the main summarize endpoint
 
 ### Frontend (Vercel)
 - Root directory: `client`
 - Build command: `npm run build`
 - Output directory: `dist`
 - Required env:
-   - `VITE_API_BASE_URL=<backend_url>/api`
+   - `VITE_API_BASE_URL=https://your-render-backend.onrender.com`
+   - or `VITE_API_BASE_URL=https://your-render-backend.onrender.com/api`
+
+The frontend normalizes the backend URL, so either form works.
+
+### Deployment Checklist
+1. Deploy the backend on Render first.
+2. Set `CLIENT_URL` on Render to the exact Vercel production origin.
+3. Set `VITE_API_BASE_URL` on Vercel to the Render backend URL.
+4. Redeploy Vercel after changing frontend env vars.
+5. Confirm `https://your-render-backend.onrender.com/api/health` returns `200 OK`.
+6. If you see a root `404`, that is no longer expected after the root route fix.

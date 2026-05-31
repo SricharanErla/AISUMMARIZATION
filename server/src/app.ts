@@ -42,6 +42,10 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', message: 'AI Summarizer API is running' });
+});
+
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api/summarize', summarizeRoutes);
 app.use('/api/history', historyRoutes);
